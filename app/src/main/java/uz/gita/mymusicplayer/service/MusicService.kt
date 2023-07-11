@@ -91,6 +91,9 @@ class MusicService : Service() {
         val view = RemoteViews(this.packageName, R.layout.remote_view)
         view.setTextViewText(R.id.textMusicName, musicData.title)
         view.setTextViewText(R.id.textArtistName, musicData.artist)
+        if (musicData.albumArt != null)
+            view.setImageViewBitmap(R.id.disk, musicData.albumArt)
+
 
         if (_musicPlayer != null && !musicPlayer.isPlaying) {
             view.setImageViewResource(R.id.buttonManage, R.drawable.play_button)
@@ -163,40 +166,44 @@ class MusicService : Service() {
             }
 
             CommandEnum.PREV -> {
-                if (MyEventBus.currentCursorEnum == CursorEnum.SAVED) {
-                    if (MyEventBus.roomPos - 1 == -1) {
-                        MyEventBus.roomPos = MyEventBus.roomCursor!!.count - 1
-                    } else if (MyEventBus.roomPos == MyEventBus.roomCursor!!.count) {
-                        MyEventBus.currentCursorEnum = CursorEnum.STORAGE
-                        MyEventBus.storagePos = 0
+                if (!MyEventBus.isRepeated) {
+                    if (MyEventBus.currentCursorEnum == CursorEnum.SAVED) {
+                        if (MyEventBus.roomPos - 1 == -1) {
+                            MyEventBus.roomPos = MyEventBus.roomCursor!!.count - 1
+                        } else if (MyEventBus.roomPos == MyEventBus.roomCursor!!.count) {
+                            MyEventBus.currentCursorEnum = CursorEnum.STORAGE
+                            MyEventBus.storagePos = 0
+                        } else {
+                            --MyEventBus.roomPos
+                        }
                     } else {
-                        --MyEventBus.roomPos
-                    }
-                } else {
-                    if (MyEventBus.storagePos - 1 == -1) {
-                        MyEventBus.storagePos = MyEventBus.storageCursor!!.count - 1
-                    } else {
-                        --MyEventBus.storagePos
+                        if (MyEventBus.storagePos - 1 == -1) {
+                            MyEventBus.storagePos = MyEventBus.storageCursor!!.count - 1
+                        } else {
+                            --MyEventBus.storagePos
+                        }
                     }
                 }
                 doneCommand(CommandEnum.PLAY)
             }
 
             CommandEnum.NEXT -> {
-                if (MyEventBus.currentCursorEnum == CursorEnum.SAVED) {
-                    if (MyEventBus.roomPos + 1 == MyEventBus.roomCursor!!.count) {
-                        MyEventBus.roomPos = 0
-                    } else if (MyEventBus.roomPos == MyEventBus.roomCursor!!.count) {
-                        MyEventBus.currentCursorEnum = CursorEnum.STORAGE
-                        MyEventBus.storagePos = 0
+                if (!MyEventBus.isRepeated) {
+                    if (MyEventBus.currentCursorEnum == CursorEnum.SAVED) {
+                        if (MyEventBus.roomPos + 1 == MyEventBus.roomCursor!!.count) {
+                            MyEventBus.roomPos = 0
+                        } else if (MyEventBus.roomPos == MyEventBus.roomCursor!!.count) {
+                            MyEventBus.currentCursorEnum = CursorEnum.STORAGE
+                            MyEventBus.storagePos = 0
+                        } else {
+                            ++MyEventBus.roomPos
+                        }
                     } else {
-                        ++MyEventBus.roomPos
-                    }
-                } else {
-                    if (MyEventBus.storagePos + 1 == MyEventBus.storageCursor!!.count) {
-                        MyEventBus.storagePos = 0
-                    } else {
-                        ++MyEventBus.storagePos
+                        if (MyEventBus.storagePos + 1 == MyEventBus.storageCursor!!.count) {
+                            MyEventBus.storagePos = 0
+                        } else {
+                            ++MyEventBus.storagePos
+                        }
                     }
                 }
                 doneCommand(CommandEnum.PLAY)
@@ -240,7 +247,10 @@ class MusicService : Service() {
             }
 
             CommandEnum.IS_REPEATED -> {
-
+                MyEventBus.isRepeated = !MyEventBus.isRepeated
+                scope.launch {
+                    MyEventBus.isRepeatedFlow.emit(!MyEventBus.isRepeatedFlow.value)
+                }
             }
         }
     }
@@ -257,25 +267,6 @@ class MusicService : Service() {
         unregisterReceiver(callReceiver)
     }*/
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /* {

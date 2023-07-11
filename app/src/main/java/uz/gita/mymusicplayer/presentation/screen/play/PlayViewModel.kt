@@ -23,6 +23,8 @@ class PlayViewModel @Inject constructor(
         container<PlayContract.UiState, PlayContract.SideEffect>(PlayContract.UiState.InitState)
 
     override fun onEventDispatcher(intent: PlayContract.Intent) {
+
+
         when (intent) {
             PlayContract.Intent.Back -> {
                 viewModelScope.launch {
@@ -31,20 +33,9 @@ class PlayViewModel @Inject constructor(
             }
 
             is PlayContract.Intent.CheckMusic -> {
-                repository.getAllMusics().onEach { list ->
-
-                    var isHave = false
-                    intent {
-                        reduce {
-                            list.forEach {
-                                if (it.data == intent.musicData.data) {
-                                    isHave = true
-                                }
-                            }
-                            PlayContract.UiState.CheckMusic(isHave)
-                        }
-                    }
-                }.launchIn(viewModelScope)
+                intent {
+                    reduce { PlayContract.UiState.CheckMusic(repository.checkSavedMusic(intent.musicData)) }
+                }
             }
 
             is PlayContract.Intent.UserAction -> {

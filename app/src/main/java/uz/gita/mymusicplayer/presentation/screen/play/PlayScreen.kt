@@ -1,12 +1,21 @@
 package uz.gita.mymusicplayer.presentation.screen.play
 
+import android.annotation.SuppressLint
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,11 +41,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.hilt.getViewModel
@@ -45,7 +59,10 @@ import uz.gita.mymusicplayer.R
 import uz.gita.mymusicplayer.data.model.CommandEnum
 import uz.gita.mymusicplayer.data.model.CursorEnum
 import uz.gita.mymusicplayer.navigation.AppScreen
+import uz.gita.mymusicplayer.ui.theme.leftColor
+import uz.gita.mymusicplayer.ui.theme.rightColor
 import uz.gita.mymusicplayer.utils.MyEventBus
+import uz.gita.mymusicplayer.utils.MyEventBus.isPlaying
 import uz.gita.mymusicplayer.utils.getMusicDataByPosition
 import uz.gita.mymusicplayer.utils.getTime
 import uz.gita.mymusicplayer.utils.startMusicService
@@ -61,6 +78,8 @@ class PlayScreen : AppScreen() {
         val context = LocalContext.current
 
         val uiState = viewModel.collectAsState()
+
+
         PlayScreenContent(uiState, viewModel::onEventDispatcher)
         viewModel.collectSideEffect { sideEffect ->
             when (sideEffect) {
@@ -71,10 +90,11 @@ class PlayScreen : AppScreen() {
         }
     }
 
+    @SuppressLint("StateFlowValueCalledInComposition")
     @Composable
     fun PlayScreenContent(
         uiState: State<PlayContract.UiState>,
-        eventListener: (PlayContract.Intent) -> Unit
+        onEventDispatcher: (PlayContract.Intent) -> Unit
     ) {
 
         val musicData = MyEventBus.currentMusicData.collectAsState(
@@ -82,12 +102,15 @@ class PlayScreen : AppScreen() {
                 MyEventBus.roomCursor!!.getMusicDataByPosition(MyEventBus.roomPos)
             else MyEventBus.storageCursor!!.getMusicDataByPosition(MyEventBus.storagePos)
         )
-        eventListener(PlayContract.Intent.CheckMusic(musicData.value!!))
+
+        onEventDispatcher(PlayContract.Intent.CheckMusic(musicData.value!!))
 
         val seekBarState = MyEventBus.currentTimeFlow.collectAsState(initial = 0)
         var seekBarValue by remember { mutableStateOf(seekBarState.value) }
         val musicIsPlaying = MyEventBus.isPlaying.collectAsState()
 
+
+        val isRepeated = MyEventBus.isRepeatedFlow.collectAsState()
         val milliseconds = musicData.value!!.duration
         val hours = TimeUnit.MILLISECONDS.toHours(milliseconds)
         val minutes = (milliseconds / 1000 / 60) % 60
@@ -97,6 +120,46 @@ class PlayScreen : AppScreen() {
         else "%02d:%02d:%02d".format(hours, minutes, seconds) // 03:45
 
         var isSaved by remember { mutableStateOf(false) }
+
+
+
+        var currentRotation by remember { mutableStateOf(0f) }
+
+        val rotation = remember { Animatable(currentRotation) }
+
+
+        LaunchedEffect(MyEventBus.isPlaying.value) {
+            if (MyEventBus.isPlaying.value) {
+                // Infinite repeatable rotation when is playing
+                rotation.animateTo(
+                    targetValue = currentRotation + 360f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(10000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Restart
+                    )
+                ) {
+                    currentRotation = value
+                }
+            } else {
+                if (currentRotation > 0f) {
+                    // Slow down rotation on pause
+                    rotation.animateTo(
+                        targetValue = currentRotation + 50,
+                        animationSpec = tween(
+                            durationMillis = 2800,
+                            easing = LinearOutSlowInEasing
+                        )
+                    ) {
+                        currentRotation = value
+                    }
+                }
+            }
+        }
+//        Vinyl(modifier = modifier.padding(24.dp), rotationDegrees = rotation.value)
+
+
+
+
         when (uiState.value) {
             is PlayContract.UiState.CheckMusic -> {
                 isSaved = (uiState.value as PlayContract.UiState.CheckMusic).isSaved
@@ -109,6 +172,14 @@ class PlayScreen : AppScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            leftColor,
+                            rightColor,
+                        )
+                    ),
+                )
         ) {
 
             Row(
@@ -125,7 +196,7 @@ class PlayScreen : AppScreen() {
                         .size(40.dp)
                         .clip(CircleShape)
                         .clickable {
-                            eventListener(PlayContract.Intent.Back)
+                            onEventDispatcher(PlayContract.Intent.Back)
                         }
                 )
             }
@@ -138,25 +209,29 @@ class PlayScreen : AppScreen() {
                     .weight(1.7f)
             ) {
 
-
                 if (musicData.value!!.albumArt != null)
                     Image(
                         modifier = Modifier
+                            .clip(RoundedCornerShape(50))
                             .size(250.dp)
-                            .padding(top = 10.dp, bottom = 12.dp)
-                            //.background(Color(0XFF988E8E), RoundedCornerShape(4.dp))
+
+                            .rotate(rotation.value)
                             .align(Alignment.CenterHorizontally),
                         bitmap = musicData.value!!.albumArt!!.asImageBitmap(),
+                        contentScale = ContentScale.Crop,
                         contentDescription = null
                     )
                 else {
+
+
                     Image(
                         modifier = Modifier
+                            .clip(RoundedCornerShape(50))
                             .size(250.dp)
-                            .padding(top = 10.dp, bottom = 12.dp)
-                            //.background(Color(0XFF988E8E), RoundedCornerShape(4.dp))
+                            .rotate(rotation.value)
                             .align(Alignment.CenterHorizontally),
-                        painter = painterResource(id = R.drawable.ic_music),
+                        painter = painterResource(id = R.drawable.music_disk),
+                        contentScale = ContentScale.Crop,
                         contentDescription = null
                     )
                 }
@@ -178,8 +253,9 @@ class PlayScreen : AppScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 4.dp),
-                    text = musicData.value!!.artist ?: "-- -- --",
-                    fontSize = 18.sp
+                    text =  musicData.value!!.artist ?: "-- -- --",
+                    fontSize = 18.sp,
+                    color = Color.White
                 )
             }
 
@@ -193,11 +269,11 @@ class PlayScreen : AppScreen() {
                     value = seekBarState.value.toFloat(),
                     onValueChange = { newState ->
                         seekBarValue = newState.toInt()
-                        eventListener.invoke(PlayContract.Intent.UserAction(CommandEnum.UPDATE_SEEKBAR))
+                        onEventDispatcher.invoke(PlayContract.Intent.UserAction(CommandEnum.UPDATE_SEEKBAR))
                     },
                     onValueChangeFinished = {
                         MyEventBus.currentTime.value = seekBarValue
-                        eventListener.invoke(PlayContract.Intent.UserAction(CommandEnum.UPDATE_SEEKBAR))
+                        onEventDispatcher.invoke(PlayContract.Intent.UserAction(CommandEnum.UPDATE_SEEKBAR))
                     },
                     valueRange = 0f..musicData.value!!.duration.toFloat(),
                     steps = 1000,
@@ -230,6 +306,7 @@ class PlayScreen : AppScreen() {
                     )
                 }
 
+
                 Spacer(modifier = Modifier.height(50.dp))
 
                 Row(
@@ -243,13 +320,15 @@ class PlayScreen : AppScreen() {
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(CircleShape)
+                                .padding(4.dp)
                                 .clickable {
-                                    eventListener(PlayContract.Intent.IsRepeated(MyEventBus.isRepeated))
+                                    onEventDispatcher(PlayContract.Intent.IsRepeated(MyEventBus.isRepeated))
                                 },
                             painter = painterResource(id = R.drawable.ic_repeat),
                             contentDescription = null
                         )
-                        if (MyEventBus.isRepeated) {
+
+                        if (isRepeated.value) {
                             Text(
                                 text = "1",
                                 Modifier
@@ -260,13 +339,12 @@ class PlayScreen : AppScreen() {
                         }
                     }
 
-
                     Image(
                         modifier = Modifier
                             .size(50.dp)
                             .clip(CircleShape)
                             .clickable {
-                                eventListener.invoke(PlayContract.Intent.UserAction(CommandEnum.PREV))
+                                onEventDispatcher.invoke(PlayContract.Intent.UserAction(CommandEnum.PREV))
                                 seekBarValue = 0
                             },
                         painter = painterResource(id = R.drawable.previous),
@@ -278,13 +356,11 @@ class PlayScreen : AppScreen() {
                             .size(70.dp)
                             .clip(CircleShape)
                             .clickable {
-
-                                eventListener.invoke(
+                                onEventDispatcher.invoke(
                                     PlayContract.Intent.UserAction(
                                         CommandEnum.MANAGE
                                     )
                                 )
-
                             },
                         painter = painterResource(
                             id = if (musicIsPlaying.value) R.drawable.pause_button
@@ -299,24 +375,28 @@ class PlayScreen : AppScreen() {
                             .size(50.dp)
                             .clip(RoundedCornerShape(100.dp))
                             .clickable {
-                                eventListener.invoke(PlayContract.Intent.UserAction(CommandEnum.NEXT))
+                                onEventDispatcher.invoke(PlayContract.Intent.UserAction(CommandEnum.NEXT))
                                 seekBarValue = 0
                             },
                         painter = painterResource(id = R.drawable.previous),
                         contentDescription = null
                     )
 
+
+
                     Icon(
                         painter = painterResource(id = if (isSaved) R.drawable.heart2 else R.drawable.heart1),
                         modifier = Modifier
                             .size(50.dp)
                             .clip(CircleShape)
-                            .padding(4.dp)
+                            .padding(8.dp)
                             .clickable {
                                 if (isSaved) {
-                                    eventListener(PlayContract.Intent.DeleteMusic(musicData.value!!))
+
+                                    onEventDispatcher(PlayContract.Intent.DeleteMusic(musicData.value!!))
                                 } else {
-                                    eventListener(PlayContract.Intent.SaveMusic(musicData.value!!))
+
+                                    onEventDispatcher(PlayContract.Intent.SaveMusic(musicData.value!!))
                                 }
                             },
                         contentDescription = null
@@ -325,4 +405,81 @@ class PlayScreen : AppScreen() {
             }
         }
     }
+
+
+    @Preview
+    @Composable
+    fun VinlyPrev() {
+        VinylAnimation(isPlaying = true)
+    }
+
+    @Composable
+    fun VinylAnimation(
+        modifier: Modifier = Modifier,
+        isPlaying: Boolean = false
+    ) {
+        // Allow resume on rotation
+        var currentRotation by remember { mutableStateOf(0f) }
+
+        val rotation = remember { Animatable(currentRotation) }
+
+        LaunchedEffect(isPlaying) {
+            if (isPlaying) {
+                // Infinite repeatable rotation when is playing
+                rotation.animateTo(
+                    targetValue = currentRotation + 360f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(3000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Restart
+                    )
+                ) {
+                    currentRotation = value
+                }
+            } else {
+                if (currentRotation > 0f) {
+                    // Slow down rotation on pause
+                    rotation.animateTo(
+                        targetValue = currentRotation + 50,
+                        animationSpec = tween(
+                            durationMillis = 1250,
+                            easing = LinearOutSlowInEasing
+                        )
+                    ) {
+                        currentRotation = value
+                    }
+                }
+            }
+        }
+        Vinyl(modifier = modifier.padding(24.dp), rotationDegrees = rotation.value)
+    }
+
+
+    @Composable
+    fun Vinyl(
+        modifier: Modifier = Modifier,
+        rotationDegrees: Float = 0f
+    ) {
+        Box(
+            modifier = modifier
+                .aspectRatio(1.0f)
+        ) {
+
+            // Vinyl background
+            Image(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .rotate(rotationDegrees),
+                painter = painterResource(id = R.drawable.music_disk),
+                contentDescription = ""
+            )
+
+            // Vinyl lights effect
+
+
+            // Vinyl 'album' cover
+            // For using with Coil or Glide, wrap into surface with shape
+
+        }
+    }
+
 }

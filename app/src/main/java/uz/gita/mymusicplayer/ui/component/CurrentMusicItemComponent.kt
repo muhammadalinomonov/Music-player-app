@@ -1,6 +1,13 @@
 package uz.gita.mymusicplayer.ui.component
 
+import android.annotation.SuppressLint
+import android.util.Log
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -45,6 +52,7 @@ import uz.gita.mymusicplayer.presentation.screen.musiclist.MusicListContract
 import uz.gita.mymusicplayer.utils.MyEventBus
 import uz.gita.mymusicplayer.utils.getMusicDataByPosition
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun CurrentMusicItemComponent(
     modifier: Modifier = Modifier,
@@ -54,9 +62,9 @@ fun CurrentMusicItemComponent(
     ) {
 
 
-    var musicData by remember {
-        mutableStateOf(MyEventBus.storageCursor!!.getMusicDataByPosition(MyEventBus.storagePos))
-    }
+    var musicData =  MyEventBus.currentMusicData.collectAsState().value!!
+
+
 
 
     LaunchedEffect(key1 = MyEventBus.storagePos) {
@@ -102,15 +110,15 @@ fun CurrentMusicItemComponent(
                      },*/
                     contentDescription = "MusicDisk",
                     modifier = Modifier
-                        .padding(8.dp)
-                        .width(35.dp)
-                        .height(35.dp)
+                        .clip(RoundedCornerShape(50))
+                        .width(45.dp)
+                        .height(45.dp)
                         .align(Alignment.CenterVertically)
                     //.background(Color(0XFF988E8E), RoundedCornerShape(8.dp))
                 )
             else {
                 Image(
-                    painterResource(id = R.drawable.ic_music),
+                    painterResource(id = R.drawable.music_disk),
                     /* painter = if (!albumArtUri.isAbsolute || !albumArtUri.isHierarchical  || !albumArtUri.isOpaque || (musicData.albumId == 9089203031363493168 || musicData.albumId == 6539316500227728566)) {
                          painterResource(id = R.drawable.ic_music)
                      } else {
@@ -118,9 +126,10 @@ fun CurrentMusicItemComponent(
                      },*/
                     contentDescription = "MusicDisk",
                     modifier = Modifier
-                        .padding(8.dp)
-                        .width(35.dp)
-                        .height(35.dp)
+                        .clip(RoundedCornerShape(50))
+
+                        .width(45.dp)
+                        .height(45.dp)
                         .align(Alignment.CenterVertically)
                     //.background(Color(0XFF988E8E), RoundedCornerShape(8.dp))
                 )
@@ -129,7 +138,7 @@ fun CurrentMusicItemComponent(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 2.dp)
+                    .padding(horizontal = 8.dp)
                     .align(Alignment.CenterVertically)
             ) {
                 Text(
@@ -157,7 +166,8 @@ fun CurrentMusicItemComponent(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(8.dp)
-                    .size(35.dp)
+                    .size(30.dp)
+                    .padding(4.dp)
                     .clickable {
                         musicData =
                             MyEventBus.storageCursor!!.getMusicDataByPosition(if (MyEventBus.storagePos > 0) MyEventBus.storagePos - 1 else MyEventBus.storageCursor!!.count - 1)
@@ -175,10 +185,13 @@ fun CurrentMusicItemComponent(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(8.dp)
-                    .size(35.dp)
+                    .size(30.dp)
+                    .padding(0.dp)
                     .clip(CircleShape)
                     .clickable {
                         MyEventBus.currentCursorEnum = CursorEnum.STORAGE
+
+                        Log.d("YYY", musicData.artist!!)
                         onEventDispatcher(MusicListContract.Intent.UserCommand(CommandEnum.MANAGE))
                     },
                 painter = painterResource(
@@ -192,7 +205,8 @@ fun CurrentMusicItemComponent(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(8.dp)
-                    .size(35.dp)
+                    .size(30.dp)
+                    .padding(4.dp)
                     .clickable {
                         musicData =
                             MyEventBus.storageCursor!!.getMusicDataByPosition(if (MyEventBus.storagePos < MyEventBus.storageCursor!!.count - 1) MyEventBus.storagePos + 1 else 0)
@@ -208,6 +222,7 @@ fun CurrentMusicItemComponent(
     }
 }
 
+/*
 @Composable
 fun CurrentMusicItemComponentForFavourite(
     modifier: Modifier = Modifier,
@@ -216,10 +231,13 @@ fun CurrentMusicItemComponentForFavourite(
 
     ) {
 
+    var musicData = MyEventBus.currentMusicData.collectAsState().value!!
 
-    var musicData by remember {
-        mutableStateOf(MyEventBus.storageCursor!!.getMusicDataByPosition(MyEventBus.storagePos))
-    }
+    */
+/*var musicData by remember {
+        mutableStateOf(MyEventBus.currentMusicData.collectAsState().value!!)
+    }*//*
+
 
 
     LaunchedEffect(key1 = MyEventBus.storagePos) {
@@ -258,11 +276,13 @@ fun CurrentMusicItemComponentForFavourite(
             if (musicData.albumArt != null)
                 Image(
                     bitmap = musicData.albumArt!!.asImageBitmap(),
-                    /* painter = if (!albumArtUri.isAbsolute || !albumArtUri.isHierarchical  || !albumArtUri.isOpaque || (musicData.albumId == 9089203031363493168 || musicData.albumId == 6539316500227728566)) {
+                    */
+/* painter = if (!albumArtUri.isAbsolute || !albumArtUri.isHierarchical  || !albumArtUri.isOpaque || (musicData.albumId == 9089203031363493168 || musicData.albumId == 6539316500227728566)) {
                          painterResource(id = R.drawable.ic_music)
                      } else {
                          rememberAsyncImagePainter(albumArtUri)
-                     },*/
+                     },*//*
+
                     contentDescription = "MusicDisk",
                     modifier = Modifier
                         .padding(8.dp)
@@ -274,11 +294,13 @@ fun CurrentMusicItemComponentForFavourite(
             else {
                 Image(
                     painterResource(id = R.drawable.ic_music),
-                    /* painter = if (!albumArtUri.isAbsolute || !albumArtUri.isHierarchical  || !albumArtUri.isOpaque || (musicData.albumId == 9089203031363493168 || musicData.albumId == 6539316500227728566)) {
+                    */
+/* painter = if (!albumArtUri.isAbsolute || !albumArtUri.isHierarchical  || !albumArtUri.isOpaque || (musicData.albumId == 9089203031363493168 || musicData.albumId == 6539316500227728566)) {
                          painterResource(id = R.drawable.ic_music)
                      } else {
                          rememberAsyncImagePainter(albumArtUri)
-                     },*/
+                     },*//*
+
                     contentDescription = "MusicDisk",
                     modifier = Modifier
                         .padding(8.dp)
@@ -368,4 +390,5 @@ fun CurrentMusicItemComponentForFavourite(
         }
     }
 }
+*/
 

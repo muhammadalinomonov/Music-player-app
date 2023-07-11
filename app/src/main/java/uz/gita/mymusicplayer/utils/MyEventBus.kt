@@ -20,6 +20,6 @@ object MyEventBus {
 
     var isPlaying = MutableStateFlow(false)
     val currentMusicData = MutableStateFlow<MusicData?>(null)
-
     var isRepeated = false
+    var isRepeatedFlow = MutableStateFlow(false)
 }

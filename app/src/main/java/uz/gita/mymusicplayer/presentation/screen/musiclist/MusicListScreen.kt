@@ -2,6 +2,7 @@ package uz.gita.mymusicplayer.presentation.screen.musiclist
 
 import android.Manifest
 import android.os.Build
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,7 +54,6 @@ class MusicListScreen : AppScreen() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         context.checkPermission(
                             arrayListOf(
-                                Manifest.permission.READ_EXTERNAL_STORAGE,
                                 Manifest.permission.POST_NOTIFICATIONS,
                                 Manifest.permission.READ_MEDIA_AUDIO
                             )
@@ -88,8 +89,6 @@ class MusicListScreen : AppScreen() {
     ) {
 
 
-
-
         Surface(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -99,6 +98,7 @@ class MusicListScreen : AppScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
+                        .background(Color(0xFF03A9F4))
                         .padding(start = 8.dp)
                         .padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -110,6 +110,7 @@ class MusicListScreen : AppScreen() {
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)
+
                             .padding(end = 4.dp)
                             .clickable { onEventDispatcher(MusicListContract.Intent.OpenFavouriteScreen) })
                 }
@@ -146,7 +147,9 @@ class MusicListScreen : AppScreen() {
                         }
 
                         //todo
-                        if (MyEventBus.storagePos != -1) {
+                        if (MyEventBus.storagePos != -1 ||
+                            MyEventBus.storagePos >= MyEventBus.storageCursor!!.count
+                        ) {
 //                             {
                             CurrentMusicItemComponent(
                                 modifier = Modifier/*.align(Alignment.BottomCenter)*/,
