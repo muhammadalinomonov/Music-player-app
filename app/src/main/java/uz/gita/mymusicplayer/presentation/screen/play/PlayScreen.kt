@@ -24,10 +24,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,7 +61,6 @@ import uz.gita.mymusicplayer.navigation.AppScreen
 import uz.gita.mymusicplayer.ui.theme.leftColor
 import uz.gita.mymusicplayer.ui.theme.rightColor
 import uz.gita.mymusicplayer.utils.MyEventBus
-import uz.gita.mymusicplayer.utils.MyEventBus.isPlaying
 import uz.gita.mymusicplayer.utils.getMusicDataByPosition
 import uz.gita.mymusicplayer.utils.getTime
 import uz.gita.mymusicplayer.utils.startMusicService
@@ -122,7 +120,6 @@ class PlayScreen : AppScreen() {
         var isSaved by remember { mutableStateOf(false) }
 
 
-
         var currentRotation by remember { mutableStateOf(0f) }
 
         val rotation = remember { Animatable(currentRotation) }
@@ -158,8 +155,6 @@ class PlayScreen : AppScreen() {
 //        Vinyl(modifier = modifier.padding(24.dp), rotationDegrees = rotation.value)
 
 
-
-
         when (uiState.value) {
             is PlayContract.UiState.CheckMusic -> {
                 isSaved = (uiState.value as PlayContract.UiState.CheckMusic).isSaved
@@ -189,11 +184,11 @@ class PlayScreen : AppScreen() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    painter = painterResource(id = R.drawable.ic_back),
                     contentDescription = null,
                     modifier = Modifier
                         .padding(8.dp)
-                        .size(40.dp)
+                        .size(35.dp)
                         .clip(CircleShape)
                         .clickable {
                             onEventDispatcher(PlayContract.Intent.Back)
@@ -253,7 +248,7 @@ class PlayScreen : AppScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 4.dp),
-                    text =  musicData.value!!.artist ?: "-- -- --",
+                    text = musicData.value!!.artist ?: "-- -- --",
                     fontSize = 18.sp,
                     color = Color.White
                 )
@@ -266,6 +261,7 @@ class PlayScreen : AppScreen() {
                     .weight(1f)
             ) {
                 Slider(
+                    modifier = Modifier.padding(horizontal = 8.dp),
                     value = seekBarState.value.toFloat(),
                     onValueChange = { newState ->
                         seekBarValue = newState.toInt()
@@ -277,18 +273,21 @@ class PlayScreen : AppScreen() {
                     },
                     valueRange = 0f..musicData.value!!.duration.toFloat(),
                     steps = 1000,
-                    /*colors = SliderDefaults.colors(
-                        thumbColor = Red,
-                        activeTickColor = Red,
-                        activeTrackColor = Color(0xFFCCC2C2)
-                    )*/
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color(0xFFa8dadc),
+                        activeTickColor = Color(0xFFFFFFFF),
+                        activeTrackColor = Color(0xFFCCC2C2),
+                        inactiveTickColor = Color.Gray,
+                        inactiveTrackColor = Color.Transparent
+
+                    )
                 )
 
                 // 00:00
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
+                        .padding(horizontal = 16.dp)
                 ) {
                     Text(
                         modifier = Modifier
@@ -342,7 +341,7 @@ class PlayScreen : AppScreen() {
                     Image(
                         modifier = Modifier
                             .size(50.dp)
-                            .clip(CircleShape)
+                            .padding(8.dp)
                             .clickable {
                                 onEventDispatcher.invoke(PlayContract.Intent.UserAction(CommandEnum.PREV))
                                 seekBarValue = 0
@@ -353,7 +352,7 @@ class PlayScreen : AppScreen() {
 
                     Image(
                         modifier = Modifier
-                            .size(70.dp)
+                            .size(60.dp)
                             .clip(CircleShape)
                             .clickable {
                                 onEventDispatcher.invoke(
@@ -373,7 +372,7 @@ class PlayScreen : AppScreen() {
                         modifier = Modifier
                             .rotate(180f)
                             .size(50.dp)
-                            .clip(RoundedCornerShape(100.dp))
+                            .padding(8.dp)
                             .clickable {
                                 onEventDispatcher.invoke(PlayContract.Intent.UserAction(CommandEnum.NEXT))
                                 seekBarValue = 0
@@ -386,9 +385,11 @@ class PlayScreen : AppScreen() {
 
                     Icon(
                         painter = painterResource(id = if (isSaved) R.drawable.heart2 else R.drawable.heart1),
+
                         modifier = Modifier
-                            .size(50.dp)
                             .clip(CircleShape)
+                            .size(50.dp)
+
                             .padding(8.dp)
                             .clickable {
                                 if (isSaved) {
@@ -399,7 +400,7 @@ class PlayScreen : AppScreen() {
                                     onEventDispatcher(PlayContract.Intent.SaveMusic(musicData.value!!))
                                 }
                             },
-                        contentDescription = null
+                        contentDescription = null,
                     )
                 }
             }

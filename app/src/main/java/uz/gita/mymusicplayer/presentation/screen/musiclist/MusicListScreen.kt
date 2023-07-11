@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -98,19 +99,18 @@ class MusicListScreen : AppScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
-                        .background(Color(0xFF03A9F4))
+                        .background(color = Color(0xFF03A9F4))
                         .padding(start = 8.dp)
                         .padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Music Player", fontSize = 20.sp, fontWeight = FontWeight.Medium)
+                    Text(text = "Music Player", fontSize = 20.sp, fontWeight = FontWeight.Medium, color = Color.White)
                     Icon(
-                        painter = painterResource(id = R.drawable.heart2),
+                        painter = painterResource(id = R.drawable.heart3),
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)
-
                             .padding(end = 4.dp)
                             .clickable { onEventDispatcher(MusicListContract.Intent.OpenFavouriteScreen) })
                 }
