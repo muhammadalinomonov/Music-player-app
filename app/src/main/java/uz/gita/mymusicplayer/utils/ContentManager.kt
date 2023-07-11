@@ -2,6 +2,9 @@ package uz.gita.mymusicplayer.utils
 
 import android.content.Context
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.provider.MediaStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -12,7 +15,8 @@ private val projection = arrayOf(
     MediaStore.Audio.Media.ARTIST,
     MediaStore.Audio.Media.TITLE,
     MediaStore.Audio.Media.DATA,
-    MediaStore.Audio.Media.DURATION
+    MediaStore.Audio.Media.DURATION,
+    MediaStore.Audio.Media.ALBUM_ID
 )
 
 fun Context.getMusicCursor(): Flow<Cursor> = flow {
@@ -28,11 +32,23 @@ fun Context.getMusicCursor(): Flow<Cursor> = flow {
 
 fun Cursor.getMusicDataByPosition(pos: Int): MusicData {
     this.moveToPosition(pos)
+
+    val mmr = MediaMetadataRetriever()
+    mmr.setDataSource(this.getString(3))
+    val albumArt = getBitmap(mmr.embeddedPicture)
+    mmr.release()
     return MusicData(
         id = this.getInt(0),
         artist = this.getString(1),
         title = this.getString(2),
         data = this.getString(3),
-        duration = this.getLong(4)
+        duration = this.getLong(4),
+        albumArt = albumArt
     )
+}
+private fun getBitmap(byteArray: ByteArray?): Bitmap? {
+    if (byteArray != null) {
+        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+    }
+    return null
 }

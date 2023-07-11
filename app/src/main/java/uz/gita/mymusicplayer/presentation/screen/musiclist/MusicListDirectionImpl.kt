@@ -1,6 +1,7 @@
 package uz.gita.mymusicplayer.presentation.screen.musiclist
 
 import uz.gita.mymusicplayer.navigation.AppNavigator
+import uz.gita.mymusicplayer.presentation.screen.favourite.FavouriteScreen
 import uz.gita.mymusicplayer.presentation.screen.play.PlayScreen
 import javax.inject.Inject
 
@@ -11,6 +12,6 @@ class MusicListDirectionImpl @Inject constructor(private val navigator: AppNavig
     }
 
     override suspend fun openFavouriteScreen() {
-        //todo navigator.navigateTo(FavouriteScreen())
+        navigator.navigateTo(FavouriteScreen())
     }
 }

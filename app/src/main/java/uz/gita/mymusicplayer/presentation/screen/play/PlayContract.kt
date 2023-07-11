@@ -23,6 +23,7 @@ interface PlayContract {
         data class SaveMusic(val musicData: MusicData) : Intent
         data class DeleteMusic(val musicData: MusicData) : Intent
         data class CheckMusic(val musicData: MusicData) : Intent
+        data class IsRepeated(val isRepeated:Boolean):Intent
         object Back : Intent
     }
 

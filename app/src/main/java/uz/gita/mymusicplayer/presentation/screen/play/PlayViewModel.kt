@@ -3,15 +3,21 @@ package uz.gita.mymusicplayer.presentation.screen.play
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
+import org.orbitmvi.orbit.syntax.simple.reduce
 import org.orbitmvi.orbit.viewmodel.container
+import uz.gita.mymusicplayer.data.model.CommandEnum
+import uz.gita.mymusicplayer.domain.repository.AppRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class PlayViewModel @Inject constructor(
-    private val directions: PlayContract.Directions
+    private val directions: PlayContract.Directions,
+    private val repository: AppRepository
 ) : PlayContract.ViewModel, ViewModel() {
     override val container =
         container<PlayContract.UiState, PlayContract.SideEffect>(PlayContract.UiState.InitState)
@@ -25,7 +31,20 @@ class PlayViewModel @Inject constructor(
             }
 
             is PlayContract.Intent.CheckMusic -> {
-                //todo
+                repository.getAllMusics().onEach { list ->
+
+                    var isHave = false
+                    intent {
+                        reduce {
+                            list.forEach {
+                                if (it.data == intent.musicData.data) {
+                                    isHave = true
+                                }
+                            }
+                            PlayContract.UiState.CheckMusic(isHave)
+                        }
+                    }
+                }.launchIn(viewModelScope)
             }
 
             is PlayContract.Intent.UserAction -> {
@@ -35,11 +54,15 @@ class PlayViewModel @Inject constructor(
             }
 
             is PlayContract.Intent.DeleteMusic -> {
-                //todo
+                repository.removeFromFavourite(intent.musicData.toEntity())
             }
 
             is PlayContract.Intent.SaveMusic -> {
-                //todo
+                repository.addToFavourite(intent.musicData.toEntity())
+            }
+
+            is PlayContract.Intent.IsRepeated -> {
+                intent { postSideEffect(PlayContract.SideEffect.UserAction(CommandEnum.IS_REPEATED)) }
             }
         }
     }

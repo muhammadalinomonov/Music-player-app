@@ -23,7 +23,7 @@ class MusicListViewModel @Inject constructor(private val direction: MusicListCon
     init {
         intent {
             reduce {
-                if (MyEventBus.cursor != null) MusicListContract.UiState.PreparedData
+                if (MyEventBus.storageCursor != null) MusicListContract.UiState.PreparedData
                 else MusicListContract.UiState.Loading
             }
         }
@@ -33,7 +33,7 @@ class MusicListViewModel @Inject constructor(private val direction: MusicListCon
         when (intent) {
             is MusicListContract.Intent.LoadMusic -> {
                 intent.context.getMusicCursor().onEach {
-                    MyEventBus.cursor = it
+                    MyEventBus.storageCursor = it
                     intent {
                         reduce {
                             MusicListContract.UiState.PreparedData

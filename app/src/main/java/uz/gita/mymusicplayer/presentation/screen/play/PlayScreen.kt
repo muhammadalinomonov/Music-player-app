@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -37,15 +39,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.hilt.getViewModel
+import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import uz.gita.mymusicplayer.R
 import uz.gita.mymusicplayer.data.model.CommandEnum
+import uz.gita.mymusicplayer.data.model.CursorEnum
 import uz.gita.mymusicplayer.navigation.AppScreen
 import uz.gita.mymusicplayer.utils.MyEventBus
 import uz.gita.mymusicplayer.utils.getMusicDataByPosition
 import uz.gita.mymusicplayer.utils.getTime
 import uz.gita.mymusicplayer.utils.startMusicService
 import java.util.concurrent.TimeUnit
+
 
 class PlayScreen : AppScreen() {
 
@@ -55,7 +60,8 @@ class PlayScreen : AppScreen() {
 
         val context = LocalContext.current
 
-        PlayScreenContent(viewModel::onEventDispatcher)
+        val uiState = viewModel.collectAsState()
+        PlayScreenContent(uiState, viewModel::onEventDispatcher)
         viewModel.collectSideEffect { sideEffect ->
             when (sideEffect) {
                 is PlayContract.SideEffect.UserAction -> {
@@ -66,11 +72,17 @@ class PlayScreen : AppScreen() {
     }
 
     @Composable
-    fun PlayScreenContent(eventListener: (PlayContract.Intent) -> Unit) {
+    fun PlayScreenContent(
+        uiState: State<PlayContract.UiState>,
+        eventListener: (PlayContract.Intent) -> Unit
+    ) {
 
         val musicData = MyEventBus.currentMusicData.collectAsState(
-            initial = MyEventBus.cursor!!.getMusicDataByPosition(MyEventBus.selectMusicPos)
+            initial = if (MyEventBus.currentCursorEnum == CursorEnum.SAVED)
+                MyEventBus.roomCursor!!.getMusicDataByPosition(MyEventBus.roomPos)
+            else MyEventBus.storageCursor!!.getMusicDataByPosition(MyEventBus.storagePos)
         )
+        eventListener(PlayContract.Intent.CheckMusic(musicData.value!!))
 
         val seekBarState = MyEventBus.currentTimeFlow.collectAsState(initial = 0)
         var seekBarValue by remember { mutableStateOf(seekBarState.value) }
@@ -84,10 +96,19 @@ class PlayScreen : AppScreen() {
         val duration = if (hours == 0L) "%02d:%02d".format(minutes, seconds)
         else "%02d:%02d:%02d".format(hours, minutes, seconds) // 03:45
 
+        var isSaved by remember { mutableStateOf(false) }
+        when (uiState.value) {
+            is PlayContract.UiState.CheckMusic -> {
+                isSaved = (uiState.value as PlayContract.UiState.CheckMusic).isSaved
+            }
+
+            PlayContract.UiState.InitState -> {
+
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
-
         ) {
 
             Row(
@@ -118,15 +139,28 @@ class PlayScreen : AppScreen() {
             ) {
 
 
-                Image(
-                    modifier = Modifier
-                        .size(250.dp)
-                        .padding(top = 10.dp, bottom = 12.dp)
-                        //.background(Color(0XFF988E8E), RoundedCornerShape(4.dp))
-                        .align(Alignment.CenterHorizontally),
-                    painter = painterResource(id = R.drawable.music_disk),
-                    contentDescription = null
-                )
+                if (musicData.value!!.albumArt != null)
+                    Image(
+                        modifier = Modifier
+                            .size(250.dp)
+                            .padding(top = 10.dp, bottom = 12.dp)
+                            //.background(Color(0XFF988E8E), RoundedCornerShape(4.dp))
+                            .align(Alignment.CenterHorizontally),
+                        bitmap = musicData.value!!.albumArt!!.asImageBitmap(),
+                        contentDescription = null
+                    )
+                else {
+                    Image(
+                        modifier = Modifier
+                            .size(250.dp)
+                            .padding(top = 10.dp, bottom = 12.dp)
+                            //.background(Color(0XFF988E8E), RoundedCornerShape(4.dp))
+                            .align(Alignment.CenterHorizontally),
+                        painter = painterResource(id = R.drawable.ic_music),
+                        contentDescription = null
+                    )
+                }
+
 
                 Text(
                     textAlign = TextAlign.Center,
@@ -210,21 +244,20 @@ class PlayScreen : AppScreen() {
                                 .fillMaxSize()
                                 .clip(CircleShape)
                                 .clickable {
-                                    //todo
-                                    seekBarValue = 0
+                                    eventListener(PlayContract.Intent.IsRepeated(MyEventBus.isRepeated))
                                 },
                             painter = painterResource(id = R.drawable.ic_repeat),
                             contentDescription = null
                         )
-                        Text(
-                            text = "1",
-                            Modifier
-                                .size(26.dp)
-                                .align(Alignment.Center),
-                            textAlign = TextAlign.Center
-
-
-                        )
+                        if (MyEventBus.isRepeated) {
+                            Text(
+                                text = "1",
+                                Modifier
+                                    .size(26.dp)
+                                    .align(Alignment.Center),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
 
 
@@ -245,11 +278,13 @@ class PlayScreen : AppScreen() {
                             .size(70.dp)
                             .clip(CircleShape)
                             .clickable {
+
                                 eventListener.invoke(
                                     PlayContract.Intent.UserAction(
                                         CommandEnum.MANAGE
                                     )
                                 )
+
                             },
                         painter = painterResource(
                             id = if (musicIsPlaying.value) R.drawable.pause_button
@@ -272,13 +307,17 @@ class PlayScreen : AppScreen() {
                     )
 
                     Icon(
-                        painter = painterResource(id = R.drawable.heart1),
+                        painter = painterResource(id = if (isSaved) R.drawable.heart2 else R.drawable.heart1),
                         modifier = Modifier
                             .size(50.dp)
                             .clip(CircleShape)
                             .padding(4.dp)
                             .clickable {
-                                //todo
+                                if (isSaved) {
+                                    eventListener(PlayContract.Intent.DeleteMusic(musicData.value!!))
+                                } else {
+                                    eventListener(PlayContract.Intent.SaveMusic(musicData.value!!))
+                                }
                             },
                         contentDescription = null
                     )

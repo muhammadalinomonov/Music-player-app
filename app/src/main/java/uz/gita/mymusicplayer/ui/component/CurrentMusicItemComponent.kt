@@ -31,19 +31,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import uz.gita.mymusicplayer.R
 import uz.gita.mymusicplayer.data.model.CommandEnum
+import uz.gita.mymusicplayer.data.model.CursorEnum
+import uz.gita.mymusicplayer.presentation.screen.favourite.FavouriteContact
 import uz.gita.mymusicplayer.presentation.screen.musiclist.MusicListContract
 import uz.gita.mymusicplayer.utils.MyEventBus
 import uz.gita.mymusicplayer.utils.getMusicDataByPosition
 
-@OptIn(ExperimentalUnitApi::class)
 @Composable
 fun CurrentMusicItemComponent(
     modifier: Modifier = Modifier,
@@ -52,12 +53,14 @@ fun CurrentMusicItemComponent(
 
     ) {
 
+
     var musicData by remember {
-        mutableStateOf(MyEventBus.cursor!!.getMusicDataByPosition(MyEventBus.selectMusicPos))
+        mutableStateOf(MyEventBus.storageCursor!!.getMusicDataByPosition(MyEventBus.storagePos))
     }
 
-    LaunchedEffect(key1 = MyEventBus.selectMusicPos){
-        musicData = MyEventBus.cursor!!.getMusicDataByPosition(MyEventBus.selectMusicPos)
+
+    LaunchedEffect(key1 = MyEventBus.storagePos) {
+        musicData = MyEventBus.storageCursor!!.getMusicDataByPosition(MyEventBus.storagePos)
     }
 
     val musicIsPlaying = MyEventBus.isPlaying.collectAsState()
@@ -89,21 +92,44 @@ fun CurrentMusicItemComponent(
                 .wrapContentHeight()
                 .padding(4.dp)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_music),
-                contentDescription = "MusicDisk",
-                modifier = Modifier
-                    .padding(8.dp)
-                    .width(45.dp)
-                    .height(35.dp)
-                    .align(Alignment.CenterVertically)
-                //.background(Color(0XFF988E8E), RoundedCornerShape(8.dp))
-            )
+            if (musicData.albumArt != null)
+                Image(
+                    bitmap = musicData.albumArt!!.asImageBitmap(),
+                    /* painter = if (!albumArtUri.isAbsolute || !albumArtUri.isHierarchical  || !albumArtUri.isOpaque || (musicData.albumId == 9089203031363493168 || musicData.albumId == 6539316500227728566)) {
+                         painterResource(id = R.drawable.ic_music)
+                     } else {
+                         rememberAsyncImagePainter(albumArtUri)
+                     },*/
+                    contentDescription = "MusicDisk",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .width(35.dp)
+                        .height(35.dp)
+                        .align(Alignment.CenterVertically)
+                    //.background(Color(0XFF988E8E), RoundedCornerShape(8.dp))
+                )
+            else {
+                Image(
+                    painterResource(id = R.drawable.ic_music),
+                    /* painter = if (!albumArtUri.isAbsolute || !albumArtUri.isHierarchical  || !albumArtUri.isOpaque || (musicData.albumId == 9089203031363493168 || musicData.albumId == 6539316500227728566)) {
+                         painterResource(id = R.drawable.ic_music)
+                     } else {
+                         rememberAsyncImagePainter(albumArtUri)
+                     },*/
+                    contentDescription = "MusicDisk",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .width(35.dp)
+                        .height(35.dp)
+                        .align(Alignment.CenterVertically)
+                    //.background(Color(0XFF988E8E), RoundedCornerShape(8.dp))
+                )
+            }
 
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = 2.dp)
                     .align(Alignment.CenterVertically)
             ) {
                 Text(
@@ -132,10 +158,9 @@ fun CurrentMusicItemComponent(
                     .align(Alignment.CenterVertically)
                     .padding(8.dp)
                     .size(35.dp)
-                    .clip(CircleShape)
                     .clickable {
                         musicData =
-                            MyEventBus.cursor!!.getMusicDataByPosition(if (MyEventBus.selectMusicPos > 0) MyEventBus.selectMusicPos - 1 else MyEventBus.cursor!!.count - 1)
+                            MyEventBus.storageCursor!!.getMusicDataByPosition(if (MyEventBus.storagePos > 0) MyEventBus.storagePos - 1 else MyEventBus.storageCursor!!.count - 1)
                         onEventDispatcher(MusicListContract.Intent.UserCommand(CommandEnum.PREV))
                     },
                 painter = painterResource(
@@ -152,7 +177,10 @@ fun CurrentMusicItemComponent(
                     .padding(8.dp)
                     .size(35.dp)
                     .clip(CircleShape)
-                    .clickable { onEventDispatcher(MusicListContract.Intent.UserCommand(CommandEnum.MANAGE)) },
+                    .clickable {
+                        MyEventBus.currentCursorEnum = CursorEnum.STORAGE
+                        onEventDispatcher(MusicListContract.Intent.UserCommand(CommandEnum.MANAGE))
+                    },
                 painter = painterResource(
                     id = if (musicIsPlaying.value) R.drawable.pause_button
                     else R.drawable.play_button
@@ -165,10 +193,9 @@ fun CurrentMusicItemComponent(
                     .align(Alignment.CenterVertically)
                     .padding(8.dp)
                     .size(35.dp)
-                    .clip(CircleShape)
                     .clickable {
                         musicData =
-                            MyEventBus.cursor!!.getMusicDataByPosition(if (MyEventBus.selectMusicPos < MyEventBus.cursor!!.count- 1) MyEventBus.selectMusicPos + 1 else 0)
+                            MyEventBus.storageCursor!!.getMusicDataByPosition(if (MyEventBus.storagePos < MyEventBus.storageCursor!!.count - 1) MyEventBus.storagePos + 1 else 0)
                         onEventDispatcher(MusicListContract.Intent.UserCommand(CommandEnum.NEXT))
                     }
                     .rotate(180f),
@@ -180,3 +207,165 @@ fun CurrentMusicItemComponent(
         }
     }
 }
+
+@Composable
+fun CurrentMusicItemComponentForFavourite(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    onEventDispatcher: (FavouriteContact.Intent) -> Unit,
+
+    ) {
+
+
+    var musicData by remember {
+        mutableStateOf(MyEventBus.storageCursor!!.getMusicDataByPosition(MyEventBus.storagePos))
+    }
+
+
+    LaunchedEffect(key1 = MyEventBus.storagePos) {
+        musicData = MyEventBus.storageCursor!!.getMusicDataByPosition(MyEventBus.storagePos)
+    }
+
+    val musicIsPlaying = MyEventBus.isPlaying.collectAsState()
+
+    val scrollState = rememberScrollState()
+    var shouldAnimated by remember { mutableStateOf(true) }
+
+    // Marque effect
+    LaunchedEffect(key1 = shouldAnimated) {
+        scrollState.animateScrollTo(
+            scrollState.maxValue,
+            animationSpec = tween(10000, 200, easing = CubicBezierEasing(0f, 0f, 0f, 0f))
+        )
+        scrollState.scrollTo(0)
+        shouldAnimated = !shouldAnimated
+    }
+
+    Surface(
+        color = Color(0xFF69AADF),
+        modifier = modifier
+            .padding(8.dp)
+            .wrapContentHeight()
+            .clip(shape = RoundedCornerShape(12.dp))
+            .fillMaxWidth()
+            .clickable { onClick.invoke() }
+    ) {
+        Row(
+            modifier = Modifier
+                .wrapContentHeight()
+                .padding(4.dp)
+        ) {
+            if (musicData.albumArt != null)
+                Image(
+                    bitmap = musicData.albumArt!!.asImageBitmap(),
+                    /* painter = if (!albumArtUri.isAbsolute || !albumArtUri.isHierarchical  || !albumArtUri.isOpaque || (musicData.albumId == 9089203031363493168 || musicData.albumId == 6539316500227728566)) {
+                         painterResource(id = R.drawable.ic_music)
+                     } else {
+                         rememberAsyncImagePainter(albumArtUri)
+                     },*/
+                    contentDescription = "MusicDisk",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .width(35.dp)
+                        .height(45.dp)
+                        .align(Alignment.CenterVertically)
+                    //.background(Color(0XFF988E8E), RoundedCornerShape(8.dp))
+                )
+            else {
+                Image(
+                    painterResource(id = R.drawable.ic_music),
+                    /* painter = if (!albumArtUri.isAbsolute || !albumArtUri.isHierarchical  || !albumArtUri.isOpaque || (musicData.albumId == 9089203031363493168 || musicData.albumId == 6539316500227728566)) {
+                         painterResource(id = R.drawable.ic_music)
+                     } else {
+                         rememberAsyncImagePainter(albumArtUri)
+                     },*/
+                    contentDescription = "MusicDisk",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .width(35.dp)
+                        .height(45.dp)
+                        .align(Alignment.CenterVertically)
+                    //.background(Color(0XFF988E8E), RoundedCornerShape(8.dp))
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .width(0.dp)
+                    .weight(1f)
+                    .padding(horizontal = 4.dp)
+                    .align(Alignment.CenterVertically)
+            ) {
+                Text(
+                    text = musicData.title ?: "-- -- --",
+                    color = Color.Black,
+                    fontSize = TextUnit(18f, TextUnitType.Sp),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    modifier = Modifier.horizontalScroll(scrollState, false)
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = musicData.artist ?: "Unknown artist",
+                    color = Color.Gray,
+                    fontSize = TextUnit(14f, TextUnitType.Sp),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+            }
+
+            Image(
+                //colorFilter = ColorFilter.tint(Color.White),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(8.dp)
+                    .size(35.dp)
+                    .clickable {
+                        musicData =
+                            MyEventBus.storageCursor!!.getMusicDataByPosition(if (MyEventBus.storagePos > 0) MyEventBus.storagePos - 1 else MyEventBus.storageCursor!!.count - 1)
+                        onEventDispatcher(FavouriteContact.Intent.UserCommand(CommandEnum.PREV))
+                    },
+                painter = painterResource(
+                    id = R.drawable.previous
+
+                ),
+                contentDescription = null
+            )
+
+            Image(
+                //colorFilter = ColorFilter.tint(Color.White),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(8.dp)
+                    .size(35.dp)
+                    .clip(CircleShape)
+                    .clickable { onEventDispatcher(FavouriteContact.Intent.UserCommand(CommandEnum.MANAGE)) },
+                painter = painterResource(
+                    id = if (musicIsPlaying.value) R.drawable.pause_button
+                    else R.drawable.play_button
+                ),
+                contentDescription = null
+            )
+            Image(
+                //colorFilter = ColorFilter.tint(Color.White),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(8.dp)
+                    .size(35.dp)
+                    .clickable {
+                        musicData =
+                            MyEventBus.storageCursor!!.getMusicDataByPosition(if (MyEventBus.storagePos < MyEventBus.storageCursor!!.count - 1) MyEventBus.storagePos + 1 else 0)
+                        onEventDispatcher(FavouriteContact.Intent.UserCommand(CommandEnum.NEXT))
+                    }
+                    .rotate(180f),
+                painter = painterResource(id = R.drawable.previous),
+
+                contentDescription = null
+            )
+
+        }
+    }
+}
+

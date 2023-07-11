@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.ExperimentalUnitApi
@@ -32,6 +33,7 @@ fun MusicItem(
     musicData: MusicData,
     onClick: () -> Unit,
 ) {
+
     Surface(modifier = Modifier
         .wrapContentHeight()
         .fillMaxWidth()
@@ -43,13 +45,35 @@ fun MusicItem(
     ) {
         Row(modifier = Modifier.wrapContentHeight()) {
 
-            Image(
-                painter = painterResource(id = R.drawable.ic_music),
-                contentDescription = null,
-                modifier = Modifier
-                    .width(56.dp)
-                    .height(56.dp)
-            )
+
+            if (musicData.albumArt != null)
+                Image(
+                    bitmap = musicData.albumArt.asImageBitmap(),
+                    contentDescription = "MusicDisk",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .width(45.dp)
+                        .height(35.dp)
+                        .align(Alignment.CenterVertically)
+                    //.background(Color(0XFF988E8E), RoundedCornerShape(8.dp))
+                )
+            else {
+                Image(
+                    painterResource(id = R.drawable.ic_music),
+                    /* painter = if (!albumArtUri.isAbsolute || !albumArtUri.isHierarchical  || !albumArtUri.isOpaque || (musicData.albumId == 9089203031363493168 || musicData.albumId == 6539316500227728566)) {
+                         painterResource(id = R.drawable.ic_music)
+                     } else {
+                         rememberAsyncImagePainter(albumArtUri)
+                     },*/
+                    contentDescription = "MusicDisk",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .width(45.dp)
+                        .height(35.dp)
+                        .align(Alignment.CenterVertically)
+                    //.background(Color(0XFF988E8E), RoundedCornerShape(8.dp))
+                )
+            }
 
             Column(
                 modifier = Modifier
