@@ -68,13 +68,20 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
 
-    def voyagerVersion = "1.0.0-rc06"
+  /*  def voyagerVersion = "1.0.0-rc06"
     implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
     implementation("cafe.adriel.voyager:voyager-androidx:$voyagerVersion")
     implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:$voyagerVersion")
     implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
-    implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")*/
 
+    def voyagerVersion = "1.0.0-rc05"
+    implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-androidx:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
+    // BottomSheetNavigator
+    implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")
     //Hilt
     implementation "com.google.dagger:hilt-android:2.44.2"
     kapt "com.google.dagger:hilt-compiler:2.44.2"
@@ -103,5 +110,6 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
 
     //tab row
+    implementation 'androidx.compose.foundation:foundation:1.4.0-rc01'
 
 }

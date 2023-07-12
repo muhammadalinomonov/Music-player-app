@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import uz.gita.mymusicplayer.R
@@ -34,7 +37,21 @@ import uz.gita.mymusicplayer.utils.MyEventBus
 import uz.gita.mymusicplayer.utils.getMusicDataByPosition
 import uz.gita.mymusicplayer.utils.startMusicService
 
-class FavouriteScreen : AppScreen() {
+class FavouriteScreen : AppScreen() , Tab{
+
+
+    override val options: TabOptions
+        @Composable
+        get() {
+            val title = "Favourite tracks"
+
+            return remember {
+                TabOptions(
+                    index = 0u,
+                    title = title,
+                )
+            }
+        }
     @Composable
     override fun Content() {
         val viewModel: FavouriteContact.ViewModel = getViewModel<FavouriteViewModel>()
@@ -56,7 +73,7 @@ class FavouriteScreen : AppScreen() {
     }
 
     @Composable
-    private fun FavouriteScreenContent(
+    fun FavouriteScreenContent(
         uiState: State<FavouriteContact.UiState>,
         onEventDispatcher: (FavouriteContact.Intent) -> Unit
     ) {

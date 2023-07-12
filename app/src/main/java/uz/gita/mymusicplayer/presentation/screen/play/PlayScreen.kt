@@ -205,17 +205,51 @@ class PlayScreen : AppScreen() {
             ) {
 
                 if (musicData.value!!.albumArt != null)
-                    Image(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .size(250.dp)
 
-                            .rotate(rotation.value)
-                            .align(Alignment.CenterHorizontally),
-                        bitmap = musicData.value!!.albumArt!!.asImageBitmap(),
-                        contentScale = ContentScale.Crop,
-                        contentDescription = null
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(250.dp)
+                            .align(Alignment.CenterHorizontally)
+
+                    ) {
+
+                        Image(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .size(250.dp)
+                                .rotate(rotation.value)
+                                .align(Alignment.Center),
+                            painter = painterResource(id = R.drawable.music_disk),
+                            contentScale = ContentScale.Crop,
+                            contentDescription = null,
+                        )
+                        Image(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .clip(RoundedCornerShape(50))
+                                .size(100.dp)
+                                .rotate(rotation.value),
+                            bitmap = musicData.value!!.albumArt!!.asImageBitmap(),
+                            contentScale = ContentScale.Crop,
+                            contentDescription = null,
+                            alignment = Alignment.Center,
+                        )
+                        Spacer(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .align(Alignment.Center)
+                                .clip(
+                                    RoundedCornerShape(50)
+                                )
+                                .background(brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        leftColor,
+                                        rightColor,
+                                    )
+                                ),)
+
+                        )
+                    }
                 else {
 
 

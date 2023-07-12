@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import uz.gita.mymusicplayer.navigation.NavigationHandler
 import uz.gita.mymusicplayer.presentation.screen.musiclist.MusicListScreen
+import uz.gita.mymusicplayer.presentation.screen.tabs.TabScreen
 import uz.gita.mymusicplayer.ui.theme.MyMusicPlayerTheme
 import javax.inject.Inject
 
@@ -27,7 +28,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyMusicPlayerTheme {
-                Navigator(screen = MusicListScreen()) { navigator ->
+                Navigator(screen = TabScreen()) { navigator ->
                     navigatorHandler.navigatorState
                         .onEach { it.invoke(navigator) }
                         .launchIn(lifecycleScope)
