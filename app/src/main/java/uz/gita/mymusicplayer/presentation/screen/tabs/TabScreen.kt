@@ -4,13 +4,9 @@ import android.Manifest
 import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Tab
@@ -18,17 +14,15 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.hilt.getViewModel
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
+import uz.gita.mymusicplayer.data.model.CommandEnum
 import uz.gita.mymusicplayer.data.model.CursorEnum
 import uz.gita.mymusicplayer.navigation.AppScreen
 import uz.gita.mymusicplayer.presentation.screen.favourite.FavouriteContact
@@ -55,35 +49,18 @@ class TabScreen : AppScreen() {
             modifier = Modifier.fillMaxSize()
         ) {
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .background(color = Color(0xFF03A9F4))
-                    .padding(start = 8.dp)
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Music Player",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.White
-                )
-            }
 
             TabRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(color = Color(0xFF03A9F4)),
                 selectedTabIndex = pagerState.currentPage,
-                containerColor  = Color(0xFF03A9F4)
+                containerColor = Color(0xFF03A9F4)
             ) {
                 tabs.forEachIndexed { index, item ->
                     Tab(
                         selected = index == pagerState.currentPage,
-                        text = { Text(text = item.title, color = Color.White, ) },
+                        text = { Text(text = item.title, color = Color.White, fontSize = 22.sp) },
                         icon = { },
                         onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
                     )
@@ -96,8 +73,6 @@ class TabScreen : AppScreen() {
             ) {
                 when (it) {
                     0 -> {
-
-
                         val context = LocalContext.current
                         val viewModel: MusicListContract.ViewModel =
                             getViewModel<MusicListViewModel>()
@@ -138,6 +113,11 @@ class TabScreen : AppScreen() {
                                     MyEventBus.currentCursorEnum = CursorEnum.STORAGE
                                     startMusicService(context, sideEffect.commandEnum)
                                 }
+
+                                MusicListContract.SideEffect.PlayMusicService -> {
+                                    MyEventBus.currentCursorEnum = CursorEnum.STORAGE
+                                    startMusicService(context, CommandEnum.PLAY)
+                                }
                             }
                         }
 
@@ -176,4 +156,4 @@ class TabScreen : AppScreen() {
         }
     }
 }
-
+//#140555

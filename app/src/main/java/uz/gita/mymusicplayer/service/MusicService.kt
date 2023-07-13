@@ -75,7 +75,7 @@ class MusicService : Service() {
             PendingIntent.getActivity(this, 1, myIntent, PendingIntent.FLAG_IMMUTABLE)
 
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_music2)
             .setCustomContentView(createRemoteView(musicData))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
@@ -96,9 +96,9 @@ class MusicService : Service() {
 
 
         if (_musicPlayer != null && !musicPlayer.isPlaying) {
-            view.setImageViewResource(R.id.buttonManage, R.drawable.play_button)
+            view.setImageViewResource(R.id.buttonManage, R.drawable.play)
         } else {
-            view.setImageViewResource(R.id.buttonManage, R.drawable.pause_button)
+            view.setImageViewResource(R.id.buttonManage, R.drawable.pause)
         }
 
         view.setOnClickPendingIntent(R.id.buttonPrev, createPendingIntent(CommandEnum.PREV))

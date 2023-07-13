@@ -79,7 +79,7 @@
                 android:layout_height="35dp"
                 android:layout_marginLeft="12dp"
                 android:layout_marginRight="12dp"
-                android:src="@drawable/previous" />
+                android:src="@drawable/previous_1" />
 
             <ImageView
                 android:id="@+id/buttonManage"
@@ -99,7 +99,7 @@
                 android:layout_marginLeft="12dp"
                 android:layout_marginRight="12dp"
                 android:rotation="180"
-                android:src="@drawable/previous" />
+                android:src="@drawable/previous_1" />
 
         </LinearLayout>
     </LinearLayout>

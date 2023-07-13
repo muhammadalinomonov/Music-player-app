@@ -37,7 +37,7 @@ import uz.gita.mymusicplayer.utils.MyEventBus
 import uz.gita.mymusicplayer.utils.getMusicDataByPosition
 import uz.gita.mymusicplayer.utils.startMusicService
 
-class FavouriteScreen : AppScreen() , Tab{
+class FavouriteScreen : AppScreen(), Tab {
 
 
     override val options: TabOptions
@@ -52,6 +52,7 @@ class FavouriteScreen : AppScreen() , Tab{
                 )
             }
         }
+
     @Composable
     override fun Content() {
         val viewModel: FavouriteContact.ViewModel = getViewModel<FavouriteViewModel>()

@@ -2,12 +2,7 @@ package uz.gita.mymusicplayer.ui.component
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -47,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import uz.gita.mymusicplayer.R
 import uz.gita.mymusicplayer.data.model.CommandEnum
 import uz.gita.mymusicplayer.data.model.CursorEnum
-import uz.gita.mymusicplayer.presentation.screen.favourite.FavouriteContact
 import uz.gita.mymusicplayer.presentation.screen.musiclist.MusicListContract
 import uz.gita.mymusicplayer.utils.MyEventBus
 import uz.gita.mymusicplayer.utils.getMusicDataByPosition
@@ -62,7 +56,7 @@ fun CurrentMusicItemComponent(
     ) {
 
 
-    var musicData =  MyEventBus.currentMusicData.collectAsState().value!!
+    var musicData = MyEventBus.currentMusicData.collectAsState().value!!
 
 
 
@@ -89,6 +83,7 @@ fun CurrentMusicItemComponent(
     Surface(
         color = Color(0xFF69AADF),
         modifier = modifier
+
             .padding(8.dp)
             .wrapContentHeight()
             .clip(shape = RoundedCornerShape(12.dp))

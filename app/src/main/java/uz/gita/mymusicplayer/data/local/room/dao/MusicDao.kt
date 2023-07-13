@@ -16,7 +16,7 @@ interface MusicDao {
 
 
     @Query("SELECT * FROM musics WHERE data = :data")
-    fun checkMusicSaved(data: String):MusicEntity?
+    fun checkMusicSaved(data: String):Flow<MusicEntity?>
 
     @Delete
     fun deleteMusicSaved(musicEntity: MusicEntity)

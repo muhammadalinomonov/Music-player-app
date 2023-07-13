@@ -183,12 +183,12 @@ class PlayScreen : AppScreen() {
                     .height(56.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_back),
+                Image(
+                    painter = painterResource(id = R.drawable.back),
                     contentDescription = null,
                     modifier = Modifier
                         .padding(8.dp)
-                        .size(35.dp)
+                        .size(30.dp)
                         .clip(CircleShape)
                         .clickable {
                             onEventDispatcher(PlayContract.Intent.Back)
@@ -219,7 +219,7 @@ class PlayScreen : AppScreen() {
                                 .size(250.dp)
                                 .rotate(rotation.value)
                                 .align(Alignment.Center),
-                            painter = painterResource(id = R.drawable.music_disk),
+                            painter = painterResource(id = R.drawable.music_disk2),
                             contentScale = ContentScale.Crop,
                             contentDescription = null,
                         )
@@ -241,12 +241,14 @@ class PlayScreen : AppScreen() {
                                 .clip(
                                     RoundedCornerShape(50)
                                 )
-                                .background(brush = Brush.horizontalGradient(
-                                    colors = listOf(
-                                        leftColor,
-                                        rightColor,
-                                    )
-                                ),)
+                                .background(
+                                    brush = Brush.horizontalGradient(
+                                        colors = listOf(
+                                            leftColor,
+                                            rightColor,
+                                        )
+                                    ),
+                                )
 
                         )
                     }
@@ -259,7 +261,7 @@ class PlayScreen : AppScreen() {
                             .size(250.dp)
                             .rotate(rotation.value)
                             .align(Alignment.CenterHorizontally),
-                        painter = painterResource(id = R.drawable.music_disk),
+                        painter = painterResource(id = R.drawable.music_disk2),
                         contentScale = ContentScale.Crop,
                         contentDescription = null
                     )
@@ -352,7 +354,7 @@ class PlayScreen : AppScreen() {
                         Image(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .clip(CircleShape)
+                                .clip(RoundedCornerShape(50))
                                 .padding(4.dp)
                                 .clickable {
                                     onEventDispatcher(PlayContract.Intent.IsRepeated(MyEventBus.isRepeated))
@@ -374,20 +376,21 @@ class PlayScreen : AppScreen() {
 
                     Image(
                         modifier = Modifier
+                            .clip(RoundedCornerShape(50))
                             .size(50.dp)
                             .padding(8.dp)
                             .clickable {
                                 onEventDispatcher.invoke(PlayContract.Intent.UserAction(CommandEnum.PREV))
                                 seekBarValue = 0
                             },
-                        painter = painterResource(id = R.drawable.previous),
+                        painter = painterResource(id = R.drawable.previous_1),
                         contentDescription = null
                     )
 
                     Image(
                         modifier = Modifier
                             .size(60.dp)
-                            .clip(CircleShape)
+                            .clip(RoundedCornerShape(50))
                             .clickable {
                                 onEventDispatcher.invoke(
                                     PlayContract.Intent.UserAction(
@@ -396,8 +399,8 @@ class PlayScreen : AppScreen() {
                                 )
                             },
                         painter = painterResource(
-                            id = if (musicIsPlaying.value) R.drawable.pause_button
-                            else R.drawable.play_button
+                            id = if (musicIsPlaying.value) R.drawable.pause
+                            else R.drawable.play
                         ),
                         contentDescription = null
                     )
@@ -406,25 +409,27 @@ class PlayScreen : AppScreen() {
                         modifier = Modifier
                             .rotate(180f)
                             .size(50.dp)
+                            .clip(RoundedCornerShape(50))
                             .padding(8.dp)
+
                             .clickable {
                                 onEventDispatcher.invoke(PlayContract.Intent.UserAction(CommandEnum.NEXT))
                                 seekBarValue = 0
                             },
-                        painter = painterResource(id = R.drawable.previous),
+                        painter = painterResource(id = R.drawable.previous_1),
                         contentDescription = null
                     )
 
 
 
-                    Icon(
-                        painter = painterResource(id = if (isSaved) R.drawable.heart2 else R.drawable.heart1),
+                    Image(
+                        painter = painterResource(id = if (isSaved) R.drawable.full_like else R.drawable.like_border),
 
                         modifier = Modifier
-                            .clip(CircleShape)
-                            .size(50.dp)
-
-                            .padding(8.dp)
+                            .clip(RoundedCornerShape(50))
+                            .padding(6.dp)
+                            .size(42.dp)
+                            .padding(0.dp)
                             .clickable {
                                 if (isSaved) {
 
@@ -504,7 +509,7 @@ class PlayScreen : AppScreen() {
                 modifier = Modifier
                     .fillMaxSize()
                     .rotate(rotationDegrees),
-                painter = painterResource(id = R.drawable.music_disk),
+                painter = painterResource(id = R.drawable.music_disk2),
                 contentDescription = ""
             )
 

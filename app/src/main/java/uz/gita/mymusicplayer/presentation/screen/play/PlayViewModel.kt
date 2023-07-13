@@ -33,9 +33,9 @@ class PlayViewModel @Inject constructor(
             }
 
             is PlayContract.Intent.CheckMusic -> {
-                intent {
-                    reduce { PlayContract.UiState.CheckMusic(repository.checkSavedMusic(intent.musicData)) }
-                }
+                repository.checkSavedMusic(intent.musicData).onEach {
+                    intent { reduce { PlayContract.UiState.CheckMusic(it != null) } }
+                }.launchIn(viewModelScope)
             }
 
             is PlayContract.Intent.UserAction -> {

@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.provider.MediaStore
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import uz.gita.mymusicplayer.data.model.MusicData
@@ -33,10 +34,21 @@ fun Context.getMusicCursor(): Flow<Cursor> = flow {
 fun Cursor.getMusicDataByPosition(pos: Int): MusicData {
     this.moveToPosition(pos)
 
-    val mmr = MediaMetadataRetriever()
-    mmr.setDataSource(this.getString(3))
-    val albumArt = getBitmap(mmr.embeddedPicture)
-    mmr.release()
+    var albumArt:Bitmap? = null
+    try {
+        val mmr = MediaMetadataRetriever()
+
+        Log.d("TTT", "1-log")
+        Log.d("TTT", this.getString(3))
+        mmr.setDataSource(this.getString(3))
+        Log.d("TTT", "2 -log")
+        albumArt = getBitmap(mmr.embeddedPicture)
+        mmr.release()
+        Log.d("TTT", "3 -log")
+    }catch (e:Exception){
+        albumArt = null
+    }
+
     return MusicData(
         id = this.getInt(0),
         artist = this.getString(1),

@@ -64,6 +64,9 @@ class MusicListViewModel @Inject constructor(private val direction: MusicListCon
                 }
             }
 
+            MusicListContract.Intent.PlayMusic -> {
+                intent { postSideEffect(MusicListContract.SideEffect.PlayMusicService) }
+            }
         }
     }
 }

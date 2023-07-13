@@ -9,6 +9,8 @@ interface MusicListContract {
     sealed interface Intent {
         object RequestPermission : Intent
         data class LoadMusic(val context: Context) : Intent
+
+        object PlayMusic:Intent
         object OpenPlayScreen : Intent
         data class UserCommand(val commandEnum: CommandEnum) : Intent
         object OpenFavouriteScreen : Intent
@@ -17,6 +19,7 @@ interface MusicListContract {
     sealed interface SideEffect {
         data class StartMusicService(val commandEnum: CommandEnum) : SideEffect
         object OpenPermissionDialog : SideEffect
+        object PlayMusicService : SideEffect
     }
 
     sealed interface UiState {
