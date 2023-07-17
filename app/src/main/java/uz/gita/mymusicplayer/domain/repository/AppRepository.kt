@@ -11,7 +11,7 @@ interface AppRepository {
 
     fun getFavouriteMusics(): Cursor
 
-    fun checkSavedMusic(musicData: MusicData): Flow<MusicEntity?>
+    fun checkSavedMusic(musicData: MusicData):Boolean
 
     fun getAllMusics(): Flow<List<MusicData>>
 }

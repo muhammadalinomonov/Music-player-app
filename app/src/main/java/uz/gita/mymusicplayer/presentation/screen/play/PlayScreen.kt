@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -88,7 +90,7 @@ class PlayScreen : AppScreen() {
         }
     }
 
-    @SuppressLint("StateFlowValueCalledInComposition")
+    @SuppressLint("StateFlowValueCalledInComposition", "RememberReturnType")
     @Composable
     fun PlayScreenContent(
         uiState: State<PlayContract.UiState>,
@@ -154,6 +156,9 @@ class PlayScreen : AppScreen() {
         }
 //        Vinyl(modifier = modifier.padding(24.dp), rotationDegrees = rotation.value)
 
+        val interaction = remember {
+            MutableInteractionSource()
+        }
 
         when (uiState.value) {
             is PlayContract.UiState.CheckMusic -> {
@@ -190,7 +195,7 @@ class PlayScreen : AppScreen() {
                         .padding(8.dp)
                         .size(30.dp)
                         .clip(CircleShape)
-                        .clickable {
+                        .clickable(interactionSource = interaction, indication = null) {
                             onEventDispatcher(PlayContract.Intent.Back)
                         }
                 )
@@ -422,6 +427,12 @@ class PlayScreen : AppScreen() {
 
 
 
+
+
+
+                    /*IconButton(onClick = { *//*TODO*//* }) {
+
+                    }*/
                     Image(
                         painter = painterResource(id = if (isSaved) R.drawable.full_like else R.drawable.like_border),
 
@@ -430,7 +441,7 @@ class PlayScreen : AppScreen() {
                             .padding(6.dp)
                             .size(42.dp)
                             .padding(0.dp)
-                            .clickable {
+                            .clickable(interactionSource = interaction, indication = null) {
                                 if (isSaved) {
 
                                     onEventDispatcher(PlayContract.Intent.DeleteMusic(musicData.value!!))

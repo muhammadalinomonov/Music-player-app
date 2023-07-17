@@ -120,6 +120,7 @@ class FavouriteScreen : AppScreen(), Tab {
                             for (pos in 0 until MyEventBus.roomCursor!!.count) {
                                 item {
                                     MusicItem(
+
                                         musicData = MyEventBus.roomCursor!!.getMusicDataByPosition(
                                             pos
                                         ),

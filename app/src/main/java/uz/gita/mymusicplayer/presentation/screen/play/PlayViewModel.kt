@@ -3,8 +3,6 @@ package uz.gita.mymusicplayer.presentation.screen.play
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
@@ -33,9 +31,7 @@ class PlayViewModel @Inject constructor(
             }
 
             is PlayContract.Intent.CheckMusic -> {
-                repository.checkSavedMusic(intent.musicData).onEach {
-                    intent { reduce { PlayContract.UiState.CheckMusic(it != null) } }
-                }.launchIn(viewModelScope)
+                intent { reduce { PlayContract.UiState.CheckMusic(repository.checkSavedMusic(intent.musicData)) } }
             }
 
             is PlayContract.Intent.UserAction -> {

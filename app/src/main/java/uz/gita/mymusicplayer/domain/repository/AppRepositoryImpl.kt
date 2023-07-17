@@ -1,9 +1,7 @@
 package uz.gita.mymusicplayer.domain.repository
 
 import android.database.Cursor
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import uz.gita.mymusicplayer.data.local.room.dao.MusicDao
 import uz.gita.mymusicplayer.data.local.room.entity.MusicEntity
@@ -21,9 +19,8 @@ class AppRepositoryImpl @Inject constructor(private val dao: MusicDao) : AppRepo
 
     override fun getFavouriteMusics(): Cursor = dao.getSavedMusics()
 
-    override fun checkSavedMusic(musicData: MusicData): Flow<MusicEntity?> =
-        dao.checkMusicSaved(musicData.data ?: "").flowOn(Dispatchers.IO)
-
+    override fun checkSavedMusic(musicData: MusicData): Boolean =
+        dao.checkMusicSaved(musicData.data ?: "")
 
     override fun getAllMusics(): Flow<List<MusicData>> {
         return dao.getAllMusics().map { it.map { it.toMusicData() } }

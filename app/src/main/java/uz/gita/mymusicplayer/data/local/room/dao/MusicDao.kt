@@ -15,8 +15,8 @@ interface MusicDao {
     fun addMusic(musicEntity: MusicEntity)
 
 
-    @Query("SELECT * FROM musics WHERE data = :data")
-    fun checkMusicSaved(data: String):Flow<MusicEntity?>
+    @Query("SELECT exists (SELECT * FROM musics WHERE data = :data)")
+    fun checkMusicSaved(data: String): Boolean
 
     @Delete
     fun deleteMusicSaved(musicEntity: MusicEntity)
@@ -25,5 +25,5 @@ interface MusicDao {
     fun getAllMusics(): Flow<List<MusicEntity>>
 
     @Query("SELECT * FROM musics")
-    fun getSavedMusics():Cursor
+    fun getSavedMusics(): Cursor
 }

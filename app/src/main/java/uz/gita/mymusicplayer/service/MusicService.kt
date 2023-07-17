@@ -211,9 +211,8 @@ class MusicService : Service() {
 
             CommandEnum.PLAY -> {
                 val data =
-                    if (MyEventBus.currentCursorEnum == CursorEnum.SAVED) MyEventBus.roomCursor!!.getMusicDataByPosition(
-                        MyEventBus.roomPos
-                    ) else MyEventBus.storageCursor!!.getMusicDataByPosition(MyEventBus.storagePos)
+                    if (MyEventBus.currentCursorEnum == CursorEnum.SAVED) MyEventBus.roomCursor!!.getMusicDataByPosition(MyEventBus.roomPos)
+                    else MyEventBus.storageCursor!!.getMusicDataByPosition(MyEventBus.storagePos)
 
                 scope.launch { MyEventBus.currentMusicData.emit(data) }
 

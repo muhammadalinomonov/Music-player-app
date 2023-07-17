@@ -7,8 +7,11 @@ import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.provider.MediaStore
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import uz.gita.mymusicplayer.data.model.MusicData
 
 private val projection = arrayOf(
@@ -35,19 +38,22 @@ fun Cursor.getMusicDataByPosition(pos: Int): MusicData {
     this.moveToPosition(pos)
 
     var albumArt:Bitmap? = null
-    try {
+
+    /*try {
         val mmr = MediaMetadataRetriever()
 
         Log.d("TTT", "1-log")
         Log.d("TTT", this.getString(3))
         mmr.setDataSource(this.getString(3))
         Log.d("TTT", "2 -log")
-        albumArt = getBitmap(mmr.embeddedPicture)
+        albumArt = runBlocking(Dispatchers.IO) {
+            getBitmap(mmr.embeddedPicture)
+        }
         mmr.release()
         Log.d("TTT", "3 -log")
     }catch (e:Exception){
         albumArt = null
-    }
+    }*/
 
     return MusicData(
         id = this.getInt(0),
@@ -58,9 +64,11 @@ fun Cursor.getMusicDataByPosition(pos: Int): MusicData {
         albumArt = albumArt
     )
 }
-private fun getBitmap(byteArray: ByteArray?): Bitmap? {
+private suspend fun getBitmap(byteArray: ByteArray?): Bitmap? {
     if (byteArray != null) {
-        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+        return withContext(Dispatchers.Default) {
+            BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+        }
     }
     return null
 }
