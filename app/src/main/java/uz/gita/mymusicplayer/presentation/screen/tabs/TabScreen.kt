@@ -2,6 +2,7 @@ package uz.gita.mymusicplayer.presentation.screen.tabs
 
 import android.Manifest
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -111,7 +112,17 @@ class TabScreen : AppScreen() {
 
                                 is MusicListContract.SideEffect.StartMusicService -> {
                                     MyEventBus.currentCursorEnum = CursorEnum.STORAGE
-                                    startMusicService(context, sideEffect.commandEnum)
+
+                                    try {
+
+                                        startMusicService(context, sideEffect.commandEnum)
+                                    } catch (e: Exception) {
+                                        Toast.makeText(
+                                            context,
+                                            e.message ?: "This operation is impossible",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
 
                                 MusicListContract.SideEffect.PlayMusicService -> {
